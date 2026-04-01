@@ -90,11 +90,27 @@ html:not(.dark) .text-tertiary{color:#0099cc!important;}
 
 /* ── Project cards ── */
 .project-card-glow{transition:all 0.5s cubic-bezier(0.4,0,0.2,1);}
-.project-card-glow:hover{box-shadow:0 0 40px -10px rgba(79,70,229,0.5);}
 .project-card-3d{transform-style:preserve-3d;transition:transform 0.5s cubic-bezier(0.2,0.8,0.2,1),box-shadow 0.5s cubic-bezier(0.4,0,0.2,1);}
-.project-card-3d:hover{box-shadow:0 25px 60px -15px rgba(79,70,229,0.4);}
 .card-glow-overlay{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:20;opacity:0;transition:opacity 0.4s cubic-bezier(0.4,0,0.2,1);border-radius:inherit;}
-.project-card-3d:hover .card-glow-overlay{opacity:1;}
+/* Desktop hover (real pointer only) */
+@media (hover: hover) {
+  .project-card-glow:hover{box-shadow:0 0 40px -10px rgba(79,70,229,0.5);}
+  .project-card-3d:hover{box-shadow:0 25px 60px -15px rgba(79,70,229,0.4);}
+  .project-card-3d:hover .card-glow-overlay{opacity:1;}
+  .project-card-3d:hover .proj-desc{opacity:1;}
+  .project-card-3d:hover #c3-callout{opacity:1;transform:translateY(0);}
+  #photo-gallery .project-card-3d:hover img{filter:grayscale(0);}
+}
+/* is-active: applied by JS on scroll (mobile) */
+.project-card-3d.is-active{box-shadow:0 25px 60px -15px rgba(79,70,229,0.4);}
+.project-card-3d.is-active .card-glow-overlay{opacity:1;}
+.project-card-3d.is-active .proj-desc{opacity:1;}
+.project-card-3d.is-active #c3-callout{opacity:1;transform:translateY(0);}
+#photo-gallery .project-card-3d.is-active img{filter:grayscale(0);}
+/* Default hidden states (CSS, not inline) */
+.proj-desc{opacity:0;}
+#c3-callout{opacity:0;transform:translateY(8px);}
+#photo-gallery img{filter:grayscale(1);}
 
 /* ── Typewriter cursor ── */
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
@@ -206,8 +222,9 @@ html:not(.dark) .proj-img-card .proj-gradient{
 /* text inside image cards needs to stay readable in light mode */
 html:not(.dark) .proj-img-card .proj-label{ color:var(--primary)!important; }
 html:not(.dark) .proj-img-card .proj-title{ color:var(--fg)!important; }
-html:not(.dark) .proj-img-card .proj-desc { color:var(--fg)!important; opacity:0; }
-html:not(.dark) .proj-img-card:hover .proj-desc { opacity:1!important; }
+html:not(.dark) .proj-img-card .proj-desc { color:var(--fg)!important; }
+@media (hover: hover) { html:not(.dark) .proj-img-card:hover .proj-desc { opacity:1!important; } }
+html:not(.dark) .proj-img-card.is-active .proj-desc { opacity:1!important; }
 
 /* equal-height category label row for i18n */
 .proj-label-row{ min-height:2.4em; }
@@ -471,7 +488,7 @@ html:not(.dark) .proj-img-card:hover .proj-desc { opacity:1!important; }
             </div>
             <h3 class="proj-title font-headline text-2xl" style="color:var(--fg)">Chrono AI</h3>
             <p class="proj-desc font-body text-sm leading-relaxed transition-opacity duration-400"
-               style="color:var(--muted);opacity:0"
+               style="color:var(--muted)"
                id="chrono-desc"
                data-en="Turns your texts, screenshots, and PDFs into calendar events. Runs entirely in iMessage — no sign-up, no new app, just send a message and your schedule updates itself."
                data-zh="把你的文字、截图和 PDF 变成日历事件，完全在 iMessage 里运行，无需注册，发条消息日程就自动更新。">
@@ -503,7 +520,7 @@ html:not(.dark) .proj-img-card:hover .proj-desc { opacity:1!important; }
             </div>
             <h3 class="proj-title font-headline text-2xl" style="color:var(--fg)">Inbox Pilot</h3>
             <p class="proj-desc font-body text-sm leading-relaxed transition-opacity duration-400"
-               style="color:var(--muted);opacity:0"
+               style="color:var(--muted)"
                id="inbox-desc"
                data-en="A Gmail manager that reads your inbox, scores each email by importance, and handles the low-priority ones in bulk so you only ever see what matters."
                data-zh="Gmail 智能管理工具，自动读取收件箱并按重要性打分，批量处理低优先级邮件，让你只看到真正重要的内容。">
@@ -534,7 +551,7 @@ html:not(.dark) .proj-img-card:hover .proj-desc { opacity:1!important; }
 
             <!-- Before / after latency callout — visible on hover only -->
             <div class="flex items-center gap-4 transition-all duration-500"
-                 style="margin-top:8px;opacity:0;transform:translateY(8px)"
+                 style="margin-top:8px"
                  id="c3-callout">
               <div class="text-center">
                 <p class="font-headline font-bold leading-none" style="font-size:2.6rem;color:var(--muted);opacity:0.5;text-decoration:line-through">T+1</p>
@@ -618,7 +635,7 @@ html:not(.dark) .proj-img-card:hover .proj-desc { opacity:1!important; }
       <div class="relative rounded-lg overflow-hidden group project-card-glow project-card-3d flex-shrink-0 h-full">
         <div class="card-glow-overlay"></div>
         <img alt="Tokyo 2023"
-             class="h-full w-auto max-w-none grayscale hover:grayscale-0 transition-all duration-700"
+             class="h-full w-auto max-w-none transition-all duration-700"
              style="object-fit:cover;display:block"
              src="gallery/0.JPG"/>
       </div>
@@ -626,7 +643,7 @@ html:not(.dark) .proj-img-card:hover .proj-desc { opacity:1!important; }
       <div class="relative rounded-lg overflow-hidden group project-card-glow project-card-3d flex-shrink-0 h-full">
         <div class="card-glow-overlay"></div>
         <img alt="Swiss Alps 2022"
-             class="h-full w-auto max-w-none grayscale hover:grayscale-0 transition-all duration-700"
+             class="h-full w-auto max-w-none transition-all duration-700"
              style="object-fit:cover;display:block"
              src="gallery/1.JPG"/>
       </div>
@@ -634,7 +651,7 @@ html:not(.dark) .proj-img-card:hover .proj-desc { opacity:1!important; }
       <div class="relative rounded-lg overflow-hidden group project-card-glow project-card-3d flex-shrink-0 h-full">
         <div class="card-glow-overlay"></div>
         <img alt="Berlin 2024"
-             class="h-full w-auto max-w-none grayscale hover:grayscale-0 transition-all duration-700"
+             class="h-full w-auto max-w-none transition-all duration-700"
              style="object-fit:cover;display:block"
              src="gallery/2.JPG"/>
       </div>
@@ -642,7 +659,7 @@ html:not(.dark) .proj-img-card:hover .proj-desc { opacity:1!important; }
       <div class="relative rounded-lg overflow-hidden group project-card-glow project-card-3d flex-shrink-0 h-full">
         <div class="card-glow-overlay"></div>
         <img alt="Photo 4"
-             class="h-full w-auto max-w-none grayscale hover:grayscale-0 transition-all duration-700"
+             class="h-full w-auto max-w-none transition-all duration-700"
              style="object-fit:cover;display:block"
              src="gallery/3.JPG"/>
       </div>
@@ -920,21 +937,8 @@ updateNav();
 /* ── Detect touch/mobile ── */
 var isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || window.matchMedia('(hover: none)').matches;
 
-/* ── Desktop: hover-based card interactions ── */
+/* ── Desktop: 3D tilt on mousemove (CSS handles hover opacity/color) ── */
 if (!isTouchDevice) {
-  document.querySelectorAll('#projects .project-card-3d').forEach(function(card) {
-    var desc = card.querySelector('[id$="-desc"]');
-    var callout = card.querySelector('#c3-callout');
-    card.addEventListener('mouseenter', function() {
-      if (desc) desc.style.opacity = '1';
-      if (callout) { callout.style.opacity = '1'; callout.style.transform = 'translateY(0)'; }
-    });
-    card.addEventListener('mouseleave', function() {
-      if (desc) desc.style.opacity = '0';
-      if (callout) { callout.style.opacity = '0'; callout.style.transform = 'translateY(8px)'; }
-    });
-  });
-
   document.querySelectorAll('.project-card-3d').forEach(function(card) {
     var glow = card.querySelector('.card-glow-overlay');
     card.addEventListener('mousemove', function(e) {
@@ -946,18 +950,13 @@ if (!isTouchDevice) {
       if (glow) glow.style.background = 'radial-gradient(260px at '+x+'px '+y+'px, rgba(163,166,255,0.14), transparent 60%)';
     });
     card.addEventListener('mouseleave', function() {
-      card.style.transform = 'perspective(900px) rotateX(0) rotateY(0) translateY(0) scale(1)';
-      if (glow) { glow.style.opacity = '0'; }
-    });
-    card.addEventListener('mouseenter', function() {
-      if (glow) glow.style.opacity = '1';
+      card.style.transform = '';
     });
   });
 }
 
-/* ── Mobile: scroll-triggered card & photo effects ── */
+/* ── Mobile: add/remove is-active on scroll ── */
 if (isTouchDevice) {
-  // Returns true if ≥40% of el is visible in the viewport (both axes)
   function mobileInView(el) {
     var r = el.getBoundingClientRect();
     var vh = window.innerHeight, vw = window.innerWidth;
@@ -967,59 +966,16 @@ if (isTouchDevice) {
     return (visH * visW) / (r.height * r.width) >= 0.4;
   }
 
-  // Pre-collect card data once
-  var mobileCardData = [];
-  document.querySelectorAll('#projects .project-card-3d').forEach(function(card) {
-    mobileCardData.push({
-      el: card,
-      desc: card.querySelector('[id$="-desc"]'),
-      callout: card.querySelector('#c3-callout'),
-      glow: card.querySelector('.card-glow-overlay')
-    });
-  });
-
   function updateMobileEffects() {
-    // Project cards: lift, glow, desc, callout
-    mobileCardData.forEach(function(c) {
-      var inView = mobileInView(c.el);
-      c.el.style.transform = inView
-        ? 'perspective(900px) rotateX(0) rotateY(0) translateY(-6px) scale(1.02)'
-        : 'perspective(900px) rotateX(0) rotateY(0) translateY(0) scale(1)';
-      if (c.glow) {
-        c.glow.style.opacity = inView ? '1' : '0';
-        if (inView) c.glow.style.background = 'radial-gradient(260px at 50% 50%, rgba(163,166,255,0.14), transparent 60%)';
-      }
-      if (c.desc) c.desc.style.opacity = inView ? '1' : '0';
-      if (c.callout) {
-        c.callout.style.opacity = inView ? '1' : '0';
-        c.callout.style.transform = inView ? 'translateY(0)' : 'translateY(8px)';
-      }
-    });
-
-    // Photography: lift + grayscale → color
-    document.querySelectorAll('#photo-gallery .project-card-3d').forEach(function(card) {
-      var inView = mobileInView(card);
-      var glow = card.querySelector('.card-glow-overlay');
-      var img  = card.querySelector('img');
-      card.style.transform = inView
-        ? 'perspective(900px) rotateX(0) rotateY(0) translateY(-6px) scale(1.02)'
-        : 'perspective(900px) rotateX(0) rotateY(0) translateY(0) scale(1)';
-      if (glow) {
-        glow.style.opacity = inView ? '1' : '0';
-        if (inView) glow.style.background = 'radial-gradient(260px at 50% 50%, rgba(163,166,255,0.14), transparent 60%)';
-      }
-      if (img) {
-        if (inView) img.classList.remove('grayscale');
-        else img.classList.add('grayscale');
-      }
+    document.querySelectorAll('.project-card-3d').forEach(function(card) {
+      if (mobileInView(card)) card.classList.add('is-active');
+      else card.classList.remove('is-active');
     });
   }
 
   window.addEventListener('scroll', updateMobileEffects, { passive: true });
-  // Also trigger on horizontal scroll inside the gallery
   var photoGallery = document.getElementById('photo-gallery');
   if (photoGallery) photoGallery.addEventListener('scroll', updateMobileEffects, { passive: true });
-  // Run once on load
   updateMobileEffects();
 }
 
