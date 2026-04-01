@@ -917,8 +917,8 @@ function updateNav() {
 window.addEventListener('scroll', updateNav, { passive: true });
 updateNav();
 
-/* ── Detect touch/mobile (no fine pointer = no hover) ── */
-var isTouchDevice = window.matchMedia('(hover: none)').matches;
+/* ── Detect touch/mobile ── */
+var isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || window.matchMedia('(hover: none)').matches;
 
 /* ── Project Card Hover text reveal ────────────────── */
 document.querySelectorAll('#projects .project-card-3d').forEach(function(card) {
