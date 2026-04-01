@@ -920,28 +920,11 @@ updateNav();
 /* ── Detect touch/mobile ── */
 var isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || window.matchMedia('(hover: none)').matches;
 
-/* ── Project Card Hover text reveal ────────────────── */
-document.querySelectorAll('#projects .project-card-3d').forEach(function(card) {
-  var desc = card.querySelector('[id$="-desc"]') || card.querySelector('p[style*="opacity:0"]');
-  var callout = card.querySelector('#c3-callout');
-
-  if (isTouchDevice) {
-    // Mobile: reveal when card scrolls into view
-    if ('IntersectionObserver' in window) {
-      new IntersectionObserver(function(entries) {
-        var vis = entries[0].isIntersecting;
-        if (desc) desc.style.opacity = vis ? '1' : '0';
-        if (callout) {
-          callout.style.opacity = vis ? '1' : '0';
-          callout.style.transform = vis ? 'translateY(0)' : 'translateY(8px)';
-        }
-      }, { threshold: 0.5 }).observe(card);
-    } else {
-      // Fallback: always visible
-      if (desc) desc.style.opacity = '1';
-      if (callout) { callout.style.opacity = '1'; callout.style.transform = 'translateY(0)'; }
-    }
-  } else {
+/* ── Desktop: hover-based card interactions ── */
+if (!isTouchDevice) {
+  document.querySelectorAll('#projects .project-card-3d').forEach(function(card) {
+    var desc = card.querySelector('[id$="-desc"]');
+    var callout = card.querySelector('#c3-callout');
     card.addEventListener('mouseenter', function() {
       if (desc) desc.style.opacity = '1';
       if (callout) { callout.style.opacity = '1'; callout.style.transform = 'translateY(0)'; }
@@ -950,28 +933,10 @@ document.querySelectorAll('#projects .project-card-3d').forEach(function(card) {
       if (desc) desc.style.opacity = '0';
       if (callout) { callout.style.opacity = '0'; callout.style.transform = 'translateY(8px)'; }
     });
-  }
-});
+  });
 
-/* ── 3D Card Tilt + Cursor Glow ─────────────────────── */
-document.querySelectorAll('.project-card-3d').forEach(function(card) {
-  var glow = card.querySelector('.card-glow-overlay');
-
-  if (isTouchDevice) {
-    // Mobile: static lift + centered glow when card scrolls into view
-    if ('IntersectionObserver' in window) {
-      new IntersectionObserver(function(entries) {
-        var vis = entries[0].isIntersecting;
-        card.style.transform = vis
-          ? 'perspective(900px) rotateX(0) rotateY(0) translateY(-6px) scale(1.02)'
-          : 'perspective(900px) rotateX(0) rotateY(0) translateY(0) scale(1)';
-        if (glow) {
-          glow.style.opacity = vis ? '1' : '0';
-          if (vis) glow.style.background = 'radial-gradient(260px at 50% 50%, rgba(163,166,255,0.14), transparent 60%)';
-        }
-      }, { threshold: 0.4 }).observe(card);
-    }
-  } else {
+  document.querySelectorAll('.project-card-3d').forEach(function(card) {
+    var glow = card.querySelector('.card-glow-overlay');
     card.addEventListener('mousemove', function(e) {
       var r = card.getBoundingClientRect();
       var x = e.clientX - r.left, y = e.clientY - r.top;
@@ -987,20 +952,75 @@ document.querySelectorAll('.project-card-3d').forEach(function(card) {
     card.addEventListener('mouseenter', function() {
       if (glow) glow.style.opacity = '1';
     });
-  }
-});
-
-/* ── Photography grayscale → color on mobile ────────── */
-if (isTouchDevice && 'IntersectionObserver' in window) {
-  document.querySelectorAll('#photo-gallery img').forEach(function(img) {
-    new IntersectionObserver(function(entries) {
-      if (entries[0].isIntersecting) {
-        img.classList.remove('grayscale');
-      } else {
-        img.classList.add('grayscale');
-      }
-    }, { threshold: 0.4 }).observe(img);
   });
+}
+
+/* ── Mobile: scroll-triggered card & photo effects ── */
+if (isTouchDevice) {
+  // Returns true if ≥40% of el is visible in the viewport (both axes)
+  function mobileInView(el) {
+    var r = el.getBoundingClientRect();
+    var vh = window.innerHeight, vw = window.innerWidth;
+    var visH = Math.min(r.bottom, vh) - Math.max(r.top, 0);
+    var visW = Math.min(r.right, vw) - Math.max(r.left, 0);
+    if (visH <= 0 || visW <= 0) return false;
+    return (visH * visW) / (r.height * r.width) >= 0.4;
+  }
+
+  // Pre-collect card data once
+  var mobileCardData = [];
+  document.querySelectorAll('#projects .project-card-3d').forEach(function(card) {
+    mobileCardData.push({
+      el: card,
+      desc: card.querySelector('[id$="-desc"]'),
+      callout: card.querySelector('#c3-callout'),
+      glow: card.querySelector('.card-glow-overlay')
+    });
+  });
+
+  function updateMobileEffects() {
+    // Project cards: lift, glow, desc, callout
+    mobileCardData.forEach(function(c) {
+      var inView = mobileInView(c.el);
+      c.el.style.transform = inView
+        ? 'perspective(900px) rotateX(0) rotateY(0) translateY(-6px) scale(1.02)'
+        : 'perspective(900px) rotateX(0) rotateY(0) translateY(0) scale(1)';
+      if (c.glow) {
+        c.glow.style.opacity = inView ? '1' : '0';
+        if (inView) c.glow.style.background = 'radial-gradient(260px at 50% 50%, rgba(163,166,255,0.14), transparent 60%)';
+      }
+      if (c.desc) c.desc.style.opacity = inView ? '1' : '0';
+      if (c.callout) {
+        c.callout.style.opacity = inView ? '1' : '0';
+        c.callout.style.transform = inView ? 'translateY(0)' : 'translateY(8px)';
+      }
+    });
+
+    // Photography: lift + grayscale → color
+    document.querySelectorAll('#photo-gallery .project-card-3d').forEach(function(card) {
+      var inView = mobileInView(card);
+      var glow = card.querySelector('.card-glow-overlay');
+      var img  = card.querySelector('img');
+      card.style.transform = inView
+        ? 'perspective(900px) rotateX(0) rotateY(0) translateY(-6px) scale(1.02)'
+        : 'perspective(900px) rotateX(0) rotateY(0) translateY(0) scale(1)';
+      if (glow) {
+        glow.style.opacity = inView ? '1' : '0';
+        if (inView) glow.style.background = 'radial-gradient(260px at 50% 50%, rgba(163,166,255,0.14), transparent 60%)';
+      }
+      if (img) {
+        if (inView) img.classList.remove('grayscale');
+        else img.classList.add('grayscale');
+      }
+    });
+  }
+
+  window.addEventListener('scroll', updateMobileEffects, { passive: true });
+  // Also trigger on horizontal scroll inside the gallery
+  var photoGallery = document.getElementById('photo-gallery');
+  if (photoGallery) photoGallery.addEventListener('scroll', updateMobileEffects, { passive: true });
+  // Run once on load
+  updateMobileEffects();
 }
 
 /* ── Gallery nav buttons (commented out with HTML buttons) ── */
