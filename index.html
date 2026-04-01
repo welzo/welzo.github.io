@@ -955,28 +955,21 @@ if (!isTouchDevice) {
   });
 }
 
-/* ── Mobile: add/remove is-active on scroll ── */
+/* ── Mobile: toggle is-active as cards enter/leave viewport ── */
 if (isTouchDevice) {
-  function mobileInView(el) {
-    var r = el.getBoundingClientRect();
-    var vh = window.innerHeight, vw = window.innerWidth;
-    var visH = Math.min(r.bottom, vh) - Math.max(r.top, 0);
-    var visW = Math.min(r.right, vw) - Math.max(r.left, 0);
-    if (visH <= 0 || visW <= 0) return false;
-    return (visH * visW) / (r.height * r.width) >= 0.4;
-  }
-
-  function updateMobileEffects() {
+  function updateMobileCards() {
+    var vh = window.innerHeight;
     document.querySelectorAll('.project-card-3d').forEach(function(card) {
-      if (mobileInView(card)) card.classList.add('is-active');
-      else card.classList.remove('is-active');
+      var r = card.getBoundingClientRect();
+      if (r.top < vh * 0.85 && r.bottom > 0) {
+        card.classList.add('is-active');
+      } else {
+        card.classList.remove('is-active');
+      }
     });
   }
-
-  window.addEventListener('scroll', updateMobileEffects, { passive: true });
-  var photoGallery = document.getElementById('photo-gallery');
-  if (photoGallery) photoGallery.addEventListener('scroll', updateMobileEffects, { passive: true });
-  updateMobileEffects();
+  window.addEventListener('scroll', updateMobileCards, { passive: true });
+  updateMobileCards();
 }
 
 /* ── Gallery nav buttons (commented out with HTML buttons) ── */
