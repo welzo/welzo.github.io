@@ -416,9 +416,9 @@ html:not(.dark) .proj-img-card:hover .proj-desc { opacity:1!important; }
         <div style="display:flex;align-items:flex-start;gap:14px;">
           <div class="bullet-dot" style="margin-top:8px"></div>
           <p class="font-body text-base leading-relaxed" style="color:var(--muted)"
-             data-en="Away from the keyboard, I enjoy capture people's treasured moments in their lives with my camera."
+             data-en="Away from the keyboard, I enjoy capturing people's treasured moments in their lives with my camera."
              data-zh="不写代码时，我喜欢用相机记录人们生活中珍贵的瞬间。">
-            Away from the keyboard, I enjoy capture people's treasured moments in their lives with my camera.
+            Away from the keyboard, I enjoy capturing people's treasured moments in their lives with my camera.
           </p>
         </div>
       </div>
@@ -917,39 +917,91 @@ function updateNav() {
 window.addEventListener('scroll', updateNav, { passive: true });
 updateNav();
 
+/* ── Detect touch/mobile (no fine pointer = no hover) ── */
+var isTouchDevice = window.matchMedia('(hover: none)').matches;
+
 /* ── Project Card Hover text reveal ────────────────── */
 document.querySelectorAll('#projects .project-card-3d').forEach(function(card) {
   var desc = card.querySelector('[id$="-desc"]') || card.querySelector('p[style*="opacity:0"]');
   var callout = card.querySelector('#c3-callout');
-  card.addEventListener('mouseenter', function() {
-    if (desc) desc.style.opacity = '1';
-    if (callout) { callout.style.opacity = '1'; callout.style.transform = 'translateY(0)'; }
-  });
-  card.addEventListener('mouseleave', function() {
-    if (desc) desc.style.opacity = '0';
-    if (callout) { callout.style.opacity = '0'; callout.style.transform = 'translateY(8px)'; }
-  });
+
+  if (isTouchDevice) {
+    // Mobile: reveal when card scrolls into view
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function(entries) {
+        var vis = entries[0].isIntersecting;
+        if (desc) desc.style.opacity = vis ? '1' : '0';
+        if (callout) {
+          callout.style.opacity = vis ? '1' : '0';
+          callout.style.transform = vis ? 'translateY(0)' : 'translateY(8px)';
+        }
+      }, { threshold: 0.5 }).observe(card);
+    } else {
+      // Fallback: always visible
+      if (desc) desc.style.opacity = '1';
+      if (callout) { callout.style.opacity = '1'; callout.style.transform = 'translateY(0)'; }
+    }
+  } else {
+    card.addEventListener('mouseenter', function() {
+      if (desc) desc.style.opacity = '1';
+      if (callout) { callout.style.opacity = '1'; callout.style.transform = 'translateY(0)'; }
+    });
+    card.addEventListener('mouseleave', function() {
+      if (desc) desc.style.opacity = '0';
+      if (callout) { callout.style.opacity = '0'; callout.style.transform = 'translateY(8px)'; }
+    });
+  }
 });
 
 /* ── 3D Card Tilt + Cursor Glow ─────────────────────── */
 document.querySelectorAll('.project-card-3d').forEach(function(card) {
   var glow = card.querySelector('.card-glow-overlay');
-  card.addEventListener('mousemove', function(e) {
-    var r = card.getBoundingClientRect();
-    var x = e.clientX - r.left, y = e.clientY - r.top;
-    var rx = ((y - r.height/2) / r.height) * -5;
-    var ry = ((x - r.width/2) / r.width) * 5;
-    card.style.transform = 'perspective(900px) rotateX('+rx+'deg) rotateY('+ry+'deg) translateY(-6px) scale(1.02)';
-    if (glow) glow.style.background = 'radial-gradient(260px at '+x+'px '+y+'px, rgba(163,166,255,0.14), transparent 60%)';
-  });
-  card.addEventListener('mouseleave', function() {
-    card.style.transform = 'perspective(900px) rotateX(0) rotateY(0) translateY(0) scale(1)';
-    if (glow) { glow.style.opacity = '0'; }
-  });
-  card.addEventListener('mouseenter', function() {
-    if (glow) glow.style.opacity = '1';
-  });
+
+  if (isTouchDevice) {
+    // Mobile: static lift + centered glow when card scrolls into view
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function(entries) {
+        var vis = entries[0].isIntersecting;
+        card.style.transform = vis
+          ? 'perspective(900px) rotateX(0) rotateY(0) translateY(-6px) scale(1.02)'
+          : 'perspective(900px) rotateX(0) rotateY(0) translateY(0) scale(1)';
+        if (glow) {
+          glow.style.opacity = vis ? '1' : '0';
+          if (vis) glow.style.background = 'radial-gradient(260px at 50% 50%, rgba(163,166,255,0.14), transparent 60%)';
+        }
+      }, { threshold: 0.4 }).observe(card);
+    }
+  } else {
+    card.addEventListener('mousemove', function(e) {
+      var r = card.getBoundingClientRect();
+      var x = e.clientX - r.left, y = e.clientY - r.top;
+      var rx = ((y - r.height/2) / r.height) * -5;
+      var ry = ((x - r.width/2) / r.width) * 5;
+      card.style.transform = 'perspective(900px) rotateX('+rx+'deg) rotateY('+ry+'deg) translateY(-6px) scale(1.02)';
+      if (glow) glow.style.background = 'radial-gradient(260px at '+x+'px '+y+'px, rgba(163,166,255,0.14), transparent 60%)';
+    });
+    card.addEventListener('mouseleave', function() {
+      card.style.transform = 'perspective(900px) rotateX(0) rotateY(0) translateY(0) scale(1)';
+      if (glow) { glow.style.opacity = '0'; }
+    });
+    card.addEventListener('mouseenter', function() {
+      if (glow) glow.style.opacity = '1';
+    });
+  }
 });
+
+/* ── Photography grayscale → color on mobile ────────── */
+if (isTouchDevice && 'IntersectionObserver' in window) {
+  document.querySelectorAll('#photo-gallery img').forEach(function(img) {
+    new IntersectionObserver(function(entries) {
+      if (entries[0].isIntersecting) {
+        img.classList.remove('grayscale');
+      } else {
+        img.classList.add('grayscale');
+      }
+    }, { threshold: 0.4 }).observe(img);
+  });
+}
 
 /* ── Gallery nav buttons (commented out with HTML buttons) ── */
 // var gallery = document.getElementById('photo-gallery');
